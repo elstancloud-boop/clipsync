@@ -1,11 +1,14 @@
+# Free tier: no persistent disk, so data resets when the service restarts/redeploys, and it sleeps after ~15 min idle.
+# For permanent storage, upgrade to a paid plan and add a disk mounted at /data, or move to Postgres + S3/R2.
 services:
   - type: web
     name: clipsync
     runtime: docker
-    plan: starter            # persistent disks need a paid plan
+    plan: free
     healthCheckPath: /healthz
     envVars:
       - { key: JWT_SECRET, generateValue: true }
       - { key: NODE_ENV, value: production }
-      - { key: DATA_DIR, value: /data }
-    disk: { name: clipsync-data, mountPath: /data, sizeGB: 10 }
+      - { key: DATA_DIR, value: /tmp/clipsync }
+      - { key: QUOTA_MB, value: "100" }
+      - { key: MAX_FILE_MB, value: "25" }
