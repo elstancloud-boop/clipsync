@@ -1,0 +1,21 @@
+{
+  "name": "clipsync",
+  "version": "1.0.0",
+  "description": "Copy on your phone, paste on your PC. Cross-device clipboard for text, links, images, audio, video and files.",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "test": "node test/smoke.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "better-sqlite3": "^11.3.0",
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^1.4.5-lts.1",
+    "qrcode": "^1.5.4"
+  }
+}

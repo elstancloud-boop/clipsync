@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: clipsync
+    runtime: docker
+    plan: starter            # persistent disks need a paid plan
+    healthCheckPath: /healthz
+    envVars:
+      - { key: JWT_SECRET, generateValue: true }
+      - { key: NODE_ENV, value: production }
+      - { key: DATA_DIR, value: /data }
+    disk: { name: clipsync-data, mountPath: /data, sizeGB: 10 }
