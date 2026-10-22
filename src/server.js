@@ -20,7 +20,8 @@ setInterval(() => hits.clear(), 600000).unref();
 const cookie = (req, n) => (req.headers.cookie || '').split(/;\s*/).map(c => c.split('=')).find(c => c[0] === n)?.[1];
 const setSession = (res, u) => res.cookie('cs', jwt.sign({ uid: u.id }, cfg.jwtSecret, { expiresIn: '90d' }),
   { httpOnly: true, sameSite: 'lax', secure: cfg.prod, maxAge: 90 * 864e5 });
-const auth = (req, res, next) => { try { req.uid = jwt.verify(cookie(req, 'cs'), cfg.jwtSecret).uid; next(); }
+const auth = (req, res, next) => { try { req.uid = jwt.verify(cookie(req, 'cs'), cfg.jwtSecret).uid;
+    if (!db.prepare('SELECT 1 FROM users WHERE id=?').get(req.uid)) throw 0; next(); } // stale cookie after a data reset
   catch { res.status(401).json({ error: 'Not signed in' }); } };
 // CSRF: state-changing requests must come from our own origin
 app.use((req, res, next) => { if (req.method === 'GET') return next(); const o = req.headers.origin;
