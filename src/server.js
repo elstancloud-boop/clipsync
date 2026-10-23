@@ -124,7 +124,9 @@ app.get('/api/items/:id/file', auth, (req, res) => {
   res.set('Content-Length', r.size); storage.stream(r.storage_key).pipe(res); });
 app.get('/api/stream', auth, (req, res) => {
   res.set({ 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache', Connection: 'keep-alive', 'X-Accel-Buffering': 'no' });
-  res.flushHeaders(); res.write('retry: 2000\n\n'); bus.add(req.uid, res); });
+  res.flushHeaders(); res.write('retry: 2000\n\n');
+  const id = String(req.query.d || '').replace(/[^a-zA-Z0-9-]/g, '').slice(0, 40), name = String(req.query.n || 'Device').replace(/[^\w .-]/g, '').slice(0, 20) || 'Device';
+  bus.add(req.uid, res, id.length >= 8 ? { id, name } : null); });
 setInterval(bus.ping, 25000).unref();
 
 // ---- retention sweep: auto-delete old items ----
