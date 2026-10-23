@@ -108,7 +108,13 @@ app.delete('/api/items/:id', auth, wrap(async (req, res) => {
   if (!r) return res.status(404).json({ error: 'Not found' });
   if (r.storage_key) await storage.remove(r.storage_key); drive.remove(req.uid, r.drive_id);
   db.prepare('DELETE FROM items WHERE id=?').run(r.id); bus.emit(req.uid, 'delete', { id: r.id }); res.json({ ok: true }); }));
-app.get('/api/items/:id/file', auth, (req, res) => {
+// ---- bookmarklet API: read-only token, CORS open so the bookmark works on any website ----
+function bmAuth(req, res, next) { res.set('Access-Control-Allow-Origin', '*');
+  try { const p = jwt.verify(String(req.query.t || ''), cfg.jwtSecret); if (p.k !== 'bm') throw 0;
+    if (!db.prepare('SELECT 1 FROM users WHERE id=?').get(p.uid)) throw 0; req.uid = p.uid; next(); } catch { res.status(401).json({ error: 'Bad token' }); } }
+app.get('/api/bm/token', auth, (req, res) => res.json({ token: jwt.sign({ uid: req.uid, k: 'bm' }, cfg.jwtSecret, { expiresIn: '365d' }) }));
+app.get('/api/bm/items', bmAuth, (req, res) => res.json(db.prepare('SELECT * FROM items WHERE user_id=? ORDER BY created_at DESC LIMIT 60').all(req.uid).map(pub)));
+const fileH = (req, res) => {
   const r = db.prepare('SELECT * FROM items WHERE id=? AND user_id=? AND storage_key IS NOT NULL').get(req.params.id, req.uid);
   if (!r) return res.sendStatus(404);
   // Range support so audio/video can seek. Serve user content as attachment unless safe media.
@@ -121,7 +127,9 @@ app.get('/api/items/:id/file', auth, (req, res) => {
     if (s > e || e >= r.size) return res.status(416).end();
     res.status(206).set({ 'Content-Range': `bytes ${s}-${e}/${r.size}`, 'Content-Length': e - s + 1 });
     return require('fs').createReadStream(path.join(cfg.dataDir, 'blobs', r.storage_key), { start: s, end: e }).pipe(res); }
-  res.set('Content-Length', r.size); storage.stream(r.storage_key).pipe(res); });
+  res.set('Content-Length', r.size); storage.stream(r.storage_key).pipe(res); };
+app.get('/api/items/:id/file', auth, fileH);
+app.get('/api/bm/file/:id', bmAuth, fileH);
 app.get('/api/stream', auth, (req, res) => {
   res.set({ 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache', Connection: 'keep-alive', 'X-Accel-Buffering': 'no' });
   res.flushHeaders(); res.write('retry: 2000\n\n');
