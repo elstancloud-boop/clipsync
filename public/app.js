@@ -1,7 +1,8 @@
 const $ = id => document.getElementById(id);
 const isAndroid = /Android/i.test(navigator.userAgent), isPhone = /Android|iPhone|iPad/i.test(navigator.userAgent);
 const device = isAndroid ? 'Android' : /iPhone|iPad/.test(navigator.userAgent) ? 'iPhone' : /Mac/i.test(navigator.platform) ? 'Mac' : /Win/i.test(navigator.platform) ? 'Windows' : 'Browser';
-let items = [], es, pending = new Set(), fresh = new Set();
+const myId = localStorage.did || (localStorage.did = (crypto.randomUUID ? crypto.randomUUID() : Date.now() + '-' + Math.random().toString(16).slice(2)));
+let devs = [], items = [], es, pending = new Set(), fresh = new Set();
 const toast = (m, act, fn, ms = 2500) => { $('tmsg').textContent = m; const a = $('tact'); a.hidden = !act; if (act) { a.textContent = act; a.onclick = () => { fn(); $('toast').style.display = 'none'; }; }
   $('toast').style.display = 'flex'; clearTimeout(toast.h); toast.h = setTimeout(() => $('toast').style.display = 'none', ms); };
 const api = async (p, o = {}) => { const r = await fetch('/api' + p, { credentials: 'same-origin', ...o });
@@ -24,7 +25,7 @@ $('login').onclick = async () => { try { await post('/login', { email: $('em').v
 
 // ---------- menu / modals ----------
 $('menubtn').onclick = e => { e.stopPropagation(); $('menu').style.display = $('menu').style.display === 'block' ? 'none' : 'block'; };
-addEventListener('click', () => $('menu').style.display = 'none');
+addEventListener('click', () => { $('menu').style.display = 'none'; $('devpanel').style.display = 'none'; });
 $('out').onclick = async () => { if (confirm('Log out? If you have not saved your account with an email, use "Add device" first so you can get back in.')) { await post('/logout'); es?.close(); location.reload(); } };
 $('del').onclick = async () => { if (confirm('Permanently delete your account and ALL clips? This cannot be undone.')) { await post('/delete-account'); location.reload(); } };
 $('secure').onclick = () => $('secm').style.display = 'grid'; $('sclose').onclick = () => $('secm').style.display = 'none';
@@ -47,10 +48,20 @@ const driveGo = async () => { if (window.driveOn) { if (confirm('Stop copying ne
 $('drv').onclick = driveGo; $('drvgo').onclick = driveGo;
 { const d = new URLSearchParams(location.search).get('drive'); if (d) { history.replaceState(null, '', '/'); setTimeout(() => toast(d === 'ok' ? 'Google Drive connected ✓ Clips now appear in your file picker under Drive → ClipSync' : 'Could not connect Google Drive. Please try again.', null, null, 6000), 800); } }
 $('auto').onchange = () => localStorage.auto = $('auto').checked ? '1' : '0';
-function connect() { es?.close(); es = new EventSource('/api/stream');
+function connect() { es?.close(); es = new EventSource('/api/stream?d=' + encodeURIComponent(myId) + '&n=' + encodeURIComponent(device));
+  es.addEventListener('devices', e => { const d = JSON.parse(e.data); devs = d.devices; drawDevs();
+    if (d.joined && d.joined.id !== myId) { toast('✅ ' + d.joined.name + ' connected', null, null, 4000); if ($('pairm').style.display === 'grid') { $('pairm').style.display = 'none'; clearInterval(pt); } }
+    if (d.left && d.left.id !== myId) toast(d.left.name + ' went offline', null, null, 2500); });
   es.addEventListener('item', e => { const i = JSON.parse(e.data); if (items.find(x => x.id === i.id)) return; items.unshift(i); fresh.add(i.id); render();
     const mine = i.device === device; if (!mine && $('auto').checked && i.text) copyText(i.text, true); else if (!mine) toast('New clip from ' + (i.device || 'another device')); });
   es.addEventListener('delete', e => { items = items.filter(x => x.id !== JSON.parse(e.data).id); render(); }); }
+
+function drawDevs() { const n = devs.length, others = devs.filter(d => d.id !== myId).length, c = $('devchip');
+  c.className = others ? 'on' : ''; c.innerHTML = '<i>●</i> ' + (others ? others + 1 + ' devices' : 'Only this device');
+  const p = $('devpanel'); p.innerHTML = '<h3>Connected devices</h3>' + devs.map(d => `<div class="d"><span class="g">●</span><span>${esc(d.name)}${d.id === myId ? ' <small>(this device)</small>' : ''}</span></div>`).join('') +
+    (others ? '' : '<small>No other device is connected yet.</small><div class="row"><button onclick="openPair()">＋ Connect another device</button></div>'); }
+$('devchip').onclick = e => { e.stopPropagation(); $('menu').style.display = 'none'; const p = $('devpanel'); p.style.display = p.style.display === 'block' ? 'none' : 'block'; };
+$('devpanel').onclick = e => e.stopPropagation();
 
 function emptyState() { const e = $('empty'); e.hidden = items.length > 0; if (items.length) return;
   e.innerHTML = isPhone ? `<h3>You're in 🎉 Here's how it works</h3><ol class="steps"><li><div><b>Send from here:</b> tap <b>Paste</b> or <b>Files</b> above, or use Android's <b>Share</b> button in any app and pick ClipSync (install the app from ⋯ menu first).</div></li><li><div><b>On your computer:</b> open <b>${esc(location.host)}</b>, then tap <b>I have a code</b>.</div></li><li><div>Tap <b>＋ Add device</b> at the top to get your code.</div></li></ol><button class="big" onclick="openPair()">＋ Connect my computer</button>`

@@ -31,6 +31,8 @@ header h1{font-size:21px;flex:1;margin:0}header button{background:#ffffff26;padd
 .steps li:before{content:counter(s);background:var(--b);color:#fff;border-radius:50%;min-width:30px;height:30px;display:grid;place-items:center;font-weight:700}
 .prog{height:8px;background:var(--soft);border-radius:6px;overflow:hidden;display:none;margin-top:10px}.prog i{display:block;height:100%;background:var(--b);width:0}
 .sw{display:flex;gap:10px;align-items:center;font-size:15px;color:var(--mu);margin-top:10px}.sw input{width:22px;height:22px}
+#devchip{font-size:14px;padding:8px 12px}#devchip i{color:#9aa7c2;font-style:normal}#devchip.on i{color:#4ade80}
+#devpanel{position:absolute;right:12px;top:56px;background:var(--card);color:var(--tx);border-radius:14px;box-shadow:0 6px 24px #0004;padding:14px;display:none;min-width:240px;max-width:90vw}#devpanel h3{margin:0 0 8px;font-size:17px}#devpanel div.d{display:flex;gap:8px;align-items:center;padding:6px 0}#devpanel .g{color:#16a34a}#devpanel small{color:var(--mu)}
 </style></head><body>
 <div id="drop">Drop files to send</div>
 
@@ -46,8 +48,8 @@ header h1{font-size:21px;flex:1;margin:0}header button{background:#ffffff26;padd
 </div>
 
 <div id="app" hidden>
-<header><h1>ClipSync</h1><button id="adddev">＋ Add device</button><button id="menubtn" aria-label="Menu">⋯</button>
-<div id="menu"><button id="inst" hidden>📲 Install app on this device</button><button id="drv" hidden></button><button id="secure">🔒 Save my account (email)</button><button id="out">Log out</button><button id="del" style="color:var(--red)">Delete my account &amp; data</button></div></header>
+<header><h1>ClipSync</h1><button id="devchip" aria-label="Connected devices"></button><button id="adddev">＋ Add device</button><button id="menubtn" aria-label="Menu">⋯</button>
+<div id="devpanel"></div><div id="menu"><button id="inst" hidden>📲 Install app on this device</button><button id="drv" hidden></button><button id="secure">🔒 Save my account (email)</button><button id="out">Log out</button><button id="del" style="color:var(--red)">Delete my account &amp; data</button></div></header>
 <div class="wrap">
 <div class="card"><textarea id="t" rows="2" placeholder="Type or paste text or a link…"></textarea>
 <div class="row"><button class="sec" id="pastebtn">📋 Paste</button><button class="sec" id="pick">📎 Files</button><button id="send">Send ➤</button></div>
