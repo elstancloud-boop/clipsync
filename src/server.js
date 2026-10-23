@@ -139,7 +139,7 @@ app.get('/api/drive/connect', auth, (req, res) => drive.enabled ? res.redirect(d
 app.get('/api/drive/callback', async (req, res) => { try { await drive.callback(req); res.redirect('/?drive=ok'); } catch (e) { res.redirect('/?drive=fail'); } });
 app.post('/api/drive/disconnect', auth, (req, res) => { drive.disconnect(req.uid); res.json({ ok: true }); });
 app.get('/healthz', (req, res) => res.send('ok'));
-app.use(express.static(path.join(__dirname, '..', 'public'), { maxAge: '1h' }));
+app.use(express.static(path.join(__dirname, '..', 'public'), { maxAge: 0, etag: true, setHeaders: (r) => r.setHeader('Cache-Control', 'no-cache') }));
 app.use((e, req, res, next) => res.status(e.code === 'LIMIT_FILE_SIZE' ? 413 : 500).json({ error: e.code === 'LIMIT_FILE_SIZE' ? 'File too large' : 'Server error' }));
 if (require.main === module) app.listen(cfg.port, () => console.log('ClipSync on :' + cfg.port));
 module.exports = app;
