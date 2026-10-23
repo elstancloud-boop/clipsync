@@ -1,43 +1,43 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>ClipSync – copy on your phone, paste on your computer</title><meta name="theme-color" content="#0056d2">
+<title>ClipSync – copy on your phone, paste on your computer</title><meta name="theme-color" content="#fbfcfd">
 <link rel="manifest" href="/manifest.webmanifest"><link rel="icon" href="/icon.svg">
 <style>
-:root{--b:#0056d2;--bg:#f5f8ff;--card:#fff;--tx:#13203a;--mu:#5b6b8a;--ln:#c9d6ee;--soft:#e6eeff;--red:#b42318;--redbg:#fde8e8}
-@media(prefers-color-scheme:dark){:root{--bg:#0d1526;--card:#16213a;--tx:#eaf0ff;--mu:#9fb0d0;--ln:#2b3b5e;--soft:#1e2d52;--red:#ff8a80;--redbg:#3a1d22}}
+:root{--b:#0b0b12;--bg:#fbfcfd;--card:#fff;--tx:#272735;--mu:#6b6b7b;--ln:#e6e6ec;--soft:#f1f1f5;--red:#b42318;--redbg:#fde8e8}
+@media(prefers-color-scheme:dark){:root{--bg:#0b0b12;--card:#14141d;--tx:#ececf3;--mu:#9a9aab;--ln:#26263a;--soft:#1d1d2a;--red:#ff8a80;--redbg:#3a1d22}}
 *{box-sizing:border-box}body{margin:0;font:17px/1.5 system-ui,sans-serif;color:var(--tx);background:var(--bg)}
-h1,h2,h3{font-family:Georgia,serif;margin:.2em 0}a{color:var(--b)}@media(prefers-color-scheme:dark){a{color:#8db4ff}}
-button{font:inherit;font-weight:600;border:0;border-radius:12px;padding:12px 18px;background:var(--b);color:#fff;cursor:pointer;min-height:46px}
-button:active{transform:scale(.97)}button.sec{background:var(--soft);color:var(--b)}button.x{background:var(--redbg);color:var(--red)}
-@media(prefers-color-scheme:dark){button.sec{color:#8db4ff}}button.big{padding:16px 26px;font-size:19px;width:100%}button.link{background:none;color:var(--mu);font-weight:500;min-height:0;padding:6px;text-decoration:underline}
+h1,h2,h3{font-family:ui-sans-serif,system-ui,sans-serif;font-weight:500;letter-spacing:-.02em;margin:.2em 0}.px{font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;letter-spacing:-.04em}a{color:var(--tx)}
+button{font:inherit;font-weight:500;border:0;border-radius:999px;padding:12px 18px;background:var(--b);color:#fff;cursor:pointer;min-height:46px}
+button:active{transform:scale(.97)}button.x{background:var(--redbg);color:var(--red)}
+button.sec{border:1px solid var(--ln);background:var(--card);color:var(--tx)}@media(prefers-color-scheme:dark){button{background:#fff;color:#0b0b12}button.sec{background:var(--card);color:var(--tx)}}button.big{padding:16px 26px;font-size:19px;width:100%}button.link{background:none;color:var(--mu);font-weight:500;min-height:0;padding:6px;text-decoration:underline}
 input,textarea{width:100%;font:inherit;padding:13px;border:1.5px solid var(--ln);border-radius:12px;background:var(--card);color:var(--tx)}
-input:focus,textarea:focus{outline:3px solid #0056d255;border-color:var(--b)}
-.wrap{max-width:720px;margin:0 auto;padding:16px}.card{background:var(--card);border-radius:16px;padding:16px;margin:0 0 12px;box-shadow:0 1px 4px #0b244a1a}
+input:focus,textarea:focus{outline:2px solid #27273533;border-color:var(--tx)}
+.wrap{max-width:720px;margin:0 auto;padding:16px}.card{background:var(--card);border-radius:14px;border:1px solid var(--ln);padding:16px;margin:0 0 12px}
 .center{text-align:center}.hint{color:var(--mu);font-size:15px}.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;align-items:center}.row>*{flex:1}
 #welcome{max-width:460px;margin:7vh auto 0;padding:20px}#welcome h1{font-size:34px;line-height:1.15}.logo{width:72px;height:72px;border-radius:18px}
 .sp{height:12px}.err{color:var(--red);min-height:22px;margin:6px 0}
-header{background:var(--b);color:#fff;padding:10px 16px;padding-top:max(10px,env(safe-area-inset-top));display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:5}
-header h1{font-size:21px;flex:1;margin:0}header button{background:#ffffff26;padding:8px 14px;min-height:40px}
+header{background:var(--card);color:var(--tx);border-bottom:1px solid var(--ln);padding:10px 16px;padding-top:max(10px,env(safe-area-inset-top));display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:5}
+header h1{font-size:17px;letter-spacing:.28em;text-transform:uppercase;font-weight:600;flex:1;margin:0}header button{background:var(--card);color:var(--tx);border:1px solid var(--ln);padding:8px 14px;min-height:40px}
 #menu{position:absolute;right:12px;top:56px;background:var(--card);border-radius:14px;box-shadow:0 6px 24px #0004;padding:8px;display:none;min-width:230px}#menu button{width:100%;text-align:left;background:none;color:var(--tx);font-weight:500;margin:0}
 .meta{font-size:13px;color:var(--mu);margin-bottom:8px}.txt{white-space:pre-wrap;word-break:break-word;max-height:200px;overflow:auto;font-size:18px}
 .clip{cursor:pointer}.clip img,.clip video{max-width:100%;max-height:360px;border-radius:12px;display:block}.clip audio{width:100%}
 .clip.fresh{animation:pop .6s}@keyframes pop{from{background:var(--soft);transform:scale(1.02)}}
 .file{display:flex;gap:12px;align-items:center;font-size:18px;word-break:break-all}.file b{font-size:34px}
-#drop{border:3px dashed var(--b);background:#e6eeffee;position:fixed;inset:8px;border-radius:20px;display:none;place-items:center;font-size:26px;color:var(--b);z-index:20}
+#drop{border:2px dashed var(--tx);background:#fbfcfdee;position:fixed;inset:8px;border-radius:20px;display:none;place-items:center;font-size:26px;color:var(--tx);z-index:20}
 .toast{position:fixed;bottom:max(18px,env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);background:#13203a;color:#fff;padding:12px 18px;border-radius:12px;display:none;z-index:30;gap:14px;align-items:center;box-shadow:0 4px 16px #0006;max-width:92vw}
 .toast button{background:none;color:#8db4ff;padding:0 4px;min-height:0}
 .modal{position:fixed;inset:0;background:#0009;display:none;place-items:center;z-index:40;padding:16px}.modal .card{max-width:420px;width:100%;margin:0;max-height:92vh;overflow:auto}
-.code{font:700 40px/1 ui-monospace,monospace;letter-spacing:6px;color:var(--b);margin:8px 0}.qr{width:200px;height:200px;margin:0 auto;background:#fff;border-radius:12px;padding:6px}
+.code{font:700 40px/1 ui-monospace,monospace;letter-spacing:6px;color:var(--tx);margin:8px 0}.qr{width:200px;height:200px;margin:0 auto;background:#fff;border-radius:12px;padding:6px}
 .steps{counter-reset:s;list-style:none;padding:0;margin:8px 0}.steps li{counter-increment:s;display:flex;gap:12px;align-items:flex-start;margin:12px 0}
-.steps li:before{content:counter(s);background:var(--b);color:#fff;border-radius:50%;min-width:30px;height:30px;display:grid;place-items:center;font-weight:700}
-.prog{height:8px;background:var(--soft);border-radius:6px;overflow:hidden;display:none;margin-top:10px}.prog i{display:block;height:100%;background:var(--b);width:0}
+.steps li:before{content:counter(s);background:var(--tx);color:var(--bg);border-radius:50%;min-width:30px;height:30px;display:grid;place-items:center;font-weight:700}
+.prog{height:8px;background:var(--soft);border-radius:6px;overflow:hidden;display:none;margin-top:10px}.prog i{display:block;height:100%;background:var(--tx);width:0}
 .sw{display:flex;gap:10px;align-items:center;font-size:15px;color:var(--mu);margin-top:10px}.sw input{width:22px;height:22px}
-#devchip{font-size:14px;padding:8px 12px}#devchip i{color:#9aa7c2;font-style:normal}#devchip.on i{color:#4ade80}
+#devchip{font-size:14px;padding:8px 12px}#devchip i{color:#9aa7c2;font-style:normal}#devchip.on i{color:#16a34a}#devchip i{color:#b5b5c3}
 #devpanel{position:absolute;right:12px;top:56px;background:var(--card);color:var(--tx);border-radius:14px;box-shadow:0 6px 24px #0004;padding:14px;display:none;min-width:240px;max-width:90vw}#devpanel h3{margin:0 0 8px;font-size:17px}#devpanel div.d{display:flex;gap:8px;align-items:center;padding:6px 0}#devpanel .g{color:#16a34a}#devpanel small{color:var(--mu)}
 </style></head><body>
 <div id="drop">Drop files to send</div>
 
 <div id="welcome" class="center" hidden>
-<img class="logo" src="/icon.svg" alt=""><h1>Copy on your phone.<br>Paste on your computer.</h1>
+<img class="logo" src="/icon.svg" alt=""><h1>Copy on your phone.<br><span class="px">Paste on your computer.</span></h1>
 <p class="hint">Text, links, photos, music, videos and files. Both ways. No setup.</p>
 <div class="sp"></div><button class="big" id="go">Get started — it's free</button>
 <div class="sp"></div><button class="big sec" id="havecode">I have a code from my other device</button>

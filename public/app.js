@@ -30,11 +30,12 @@ $('out').onclick = async () => { if (confirm('Log out? If you have not saved you
 $('del').onclick = async () => { if (confirm('Permanently delete your account and ALL clips? This cannot be undone.')) { await post('/delete-account'); location.reload(); } };
 $('secure').onclick = () => $('secm').style.display = 'grid'; $('sclose').onclick = () => $('secm').style.display = 'none';
 $('ssave').onclick = async () => { try { await post('/upgrade', { email: $('sem').value, password: $('spw').value }); $('secm').style.display = 'none'; toast('Account saved ✓'); start(); } catch (e) { $('serr').textContent = e.message; } };
-let pt; async function openPair() { $('pairm').style.display = 'grid'; $('host').textContent = location.host; clearInterval(pt);
+let pt, pairBase = 0; function closePair(ok) { clearInterval(pt); if (ok) { $('pairbody').innerHTML = '<div style="font-size:64px">✅</div><h3>Device connected!</h3>'; setTimeout(() => { $('pairm').style.display = 'none'; }, 1200); } else $('pairm').style.display = 'none'; }
+async function openPair() { pairBase = devs.filter(x => x.id !== myId).length; if (!$('qr')) location.reload(); $('pairm').style.display = 'grid'; $('host').textContent = location.host; clearInterval(pt);
   try { const { code, expiresIn } = await post('/pair/create'); $('pcode').textContent = code.replace(/(\d{3})(\d{3})/, '$1 $2'); $('qr').src = '/api/pair/qr/' + code;
     let left = expiresIn; $('pexp').textContent = 'Code works once, for 5 minutes.'; pt = setInterval(() => { if (--left <= 0) { clearInterval(pt); openPair(); } }, 1000); }
   catch (e) { $('pexp').textContent = e.message; } }
-$('adddev').onclick = openPair; $('pclose').onclick = () => { $('pairm').style.display = 'none'; clearInterval(pt); };
+$('adddev').onclick = openPair; $('pclose').onclick = () => closePair(false);
 
 // ---------- main ----------
 async function start() {
@@ -50,7 +51,8 @@ $('drv').onclick = driveGo; $('drvgo').onclick = driveGo;
 $('auto').onchange = () => localStorage.auto = $('auto').checked ? '1' : '0';
 function connect() { es?.close(); es = new EventSource('/api/stream?d=' + encodeURIComponent(myId) + '&n=' + encodeURIComponent(device));
   es.addEventListener('devices', e => { const d = JSON.parse(e.data); devs = d.devices; drawDevs();
-    if (d.joined && d.joined.id !== myId) { toast('✅ ' + d.joined.name + ' connected', null, null, 4000); if ($('pairm').style.display === 'grid') { $('pairm').style.display = 'none'; clearInterval(pt); } }
+    if (d.joined && d.joined.id !== myId) { toast('✅ ' + d.joined.name + ' connected', null, null, 4000); }
+    if ($('pairm').style.display === 'grid' && devs.filter(x => x.id !== myId).length > pairBase) closePair(true);
     if (d.left && d.left.id !== myId) toast(d.left.name + ' went offline', null, null, 2500); });
   es.addEventListener('item', e => { const i = JSON.parse(e.data); if (items.find(x => x.id === i.id)) return; items.unshift(i); fresh.add(i.id); render();
     const mine = i.device === device; if (!mine && $('auto').checked && i.text) copyText(i.text, true); else if (!mine) toast('New clip from ' + (i.device || 'another device')); });
