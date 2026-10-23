@@ -41,13 +41,19 @@ $('adddev').onclick = openPair; $('pclose').onclick = () => closePair(false);
 async function start() {
   try { const me = await api('/me'); $('welcome').hidden = true; $('app').hidden = false; $('secure').hidden = !!me.email; setDrive(me);
     $('quota').textContent = `${sz(me.used)} of ${sz(me.quota)} used · clips auto-delete after ${me.retentionDays} days`;
-    $('auto').checked = localStorage.auto === '1'; items = await api('/items'); render(); connect(); }
+    $('auto').checked = localStorage.auto === '1'; items = await api('/items'); if (!localStorage.savedIds) items.forEach(i => savedIds.add(i.id)); render(); connect(); }
   catch { $('welcome').hidden = false; $('app').hidden = true; const c = new URLSearchParams(location.search).get('pair'); if (c) joinCode(c); } }
 function setDrive(me) { $('drv').hidden = !me.driveAvailable; $('drvbanner').hidden = !(me.driveAvailable && !me.drive);
   $('drv').textContent = me.drive ? '☁ Google Drive connected (tap to disconnect)' : '☁ Send clips to Google Drive'; window.driveOn = me.drive; }
 const driveGo = async () => { if (window.driveOn) { if (confirm('Stop copying new clips to Google Drive? Files already in Drive stay there.')) { await post('/drive/disconnect'); start(); } } else location.href = '/api/drive/connect'; };
 $('drv').onclick = driveGo; $('drvgo').onclick = driveGo;
 { const d = new URLSearchParams(location.search).get('drive'); if (d) { history.replaceState(null, '', '/'); setTimeout(() => toast(d === 'ok' ? 'Google Drive connected ✓ Clips now appear in your file picker under Drive → ClipSync' : 'Could not connect Google Drive. Please try again.', null, null, 6000), 800); } }
+const savedIds = new Set(JSON.parse(localStorage.savedIds || '[]'));
+function dropSave(i, quiet) { if (!i.name || savedIds.has(i.id)) return; savedIds.add(i.id); localStorage.savedIds = JSON.stringify([...savedIds].slice(-300));
+  const a = document.createElement('a'); a.href = '/api/items/' + i.id + '/file?dl=1'; a.download = i.name; document.body.append(a); a.click(); a.remove();
+  if (!quiet) toast('📥 ' + i.name + ' saved to Downloads. Pick it in any upload: Recent or Downloads.', null, null, 5000); }
+$('autosave').checked = localStorage.autosave ? localStorage.autosave === '1' : isAndroid;
+$('autosave').onchange = () => { localStorage.autosave = $('autosave').checked ? '1' : '0'; if ($('autosave').checked) { items.forEach(i => savedIds.add(i.id)); toast('Auto-Drop on. If Chrome asks, allow multiple downloads.', null, null, 5000); } };
 $('auto').onchange = () => localStorage.auto = $('auto').checked ? '1' : '0';
 function connect() { es?.close(); es = new EventSource('/api/stream?d=' + encodeURIComponent(myId) + '&n=' + encodeURIComponent(device));
   es.addEventListener('devices', e => { const d = JSON.parse(e.data); devs = d.devices; drawDevs();
@@ -55,7 +61,7 @@ function connect() { es?.close(); es = new EventSource('/api/stream?d=' + encode
     if ($('pairm').style.display === 'grid' && devs.filter(x => x.id !== myId).length > pairBase) closePair(true);
     if (d.left && d.left.id !== myId) toast(d.left.name + ' went offline', null, null, 2500); });
   es.addEventListener('item', e => { const i = JSON.parse(e.data); if (items.find(x => x.id === i.id)) return; items.unshift(i); fresh.add(i.id); render();
-    const mine = i.device === device; if (!mine && $('auto').checked && i.text) copyText(i.text, true); else if (!mine) toast('New clip from ' + (i.device || 'another device')); });
+    const mine = i.device === device; if (!mine && $('autosave').checked) dropSave(i); if (!mine && $('auto').checked && i.text) copyText(i.text, true); else if (!mine) toast('New clip from ' + (i.device || 'another device')); });
   es.addEventListener('delete', e => { items = items.filter(x => x.id !== JSON.parse(e.data).id); render(); }); }
 
 function drawDevs() { const n = devs.length, others = devs.filter(d => d.id !== myId).length, c = $('devchip');
