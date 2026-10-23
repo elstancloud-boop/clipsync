@@ -1,7 +1,7 @@
 const express = require('express'); const path = require('path'); const crypto = require('crypto');
 const bcrypt = require('bcryptjs'); const jwt = require('jsonwebtoken'); const multer = require('multer');
 const QR = require('qrcode');
-const cfg = require('./config'); const db = require('./db'); const storage = require('./storage'); const bus = require('./bus');
+const cfg = require('./config'); const db = require('./db'); const storage = require('./storage'); const bus = require('./bus'); const drive = require('./drive');
 
 const app = express(); app.disable('x-powered-by'); app.set('trust proxy', 1);
 app.use((req, res, next) => { res.set({ 'X-Content-Type-Options': 'nosniff', 'Referrer-Policy': 'same-origin',
@@ -66,7 +66,7 @@ app.post('/api/login', limit(20, 600e3), (req, res) => {
 app.post('/api/logout', (req, res) => { res.clearCookie('cs'); res.json({ ok: true }); });
 app.get('/api/me', auth, (req, res) => { const u = db.prepare('SELECT email FROM users WHERE id=?').get(req.uid);
   const used = db.prepare('SELECT COALESCE(SUM(size),0) s FROM items WHERE user_id=?').get(req.uid).s;
-  res.json({ email: u.email || null, used, quota: cfg.quotaBytes, retentionDays: cfg.retentionDays }); });
+  res.json({ driveAvailable: drive.enabled, drive: drive.connected(req.uid), email: u.email || null, used, quota: cfg.quotaBytes, retentionDays: cfg.retentionDays }); });
 app.post('/api/delete-account', auth, async (req, res) => {
   for (const i of db.prepare('SELECT storage_key k FROM items WHERE user_id=? AND storage_key IS NOT NULL').all(req.uid)) await storage.remove(i.k);
   db.prepare('DELETE FROM users WHERE id=?').run(req.uid); res.clearCookie('cs'); res.json({ ok: true }); });
@@ -94,7 +94,7 @@ async function ingest(req) {
   const out = [];
   if (req.body?.text?.trim()) out.push(addText(req.uid, req.body.text, req.body.device));
   for (const f of req.files || []) out.push(await addFile(req.uid, f, req.body.device));
-  out.forEach(r => bus.emit(req.uid, 'item', pub(r))); return out;
+  out.forEach(r => { bus.emit(req.uid, 'item', pub(r)); drive.mirror(req.uid, r); }); return out;
 }
 app.get('/api/items', auth, (req, res) => res.json(db.prepare('SELECT * FROM items WHERE user_id=? ORDER BY created_at DESC LIMIT 200').all(req.uid).map(pub)));
 app.post('/api/items', auth, limit(120, 60e3), upload.array('files'), wrap(async (req, res) => {
@@ -106,7 +106,7 @@ app.post('/share', auth, upload.array('files'), async (req, res) => {
 app.delete('/api/items/:id', auth, wrap(async (req, res) => {
   const r = db.prepare('SELECT * FROM items WHERE id=? AND user_id=?').get(req.params.id, req.uid);
   if (!r) return res.status(404).json({ error: 'Not found' });
-  if (r.storage_key) await storage.remove(r.storage_key);
+  if (r.storage_key) await storage.remove(r.storage_key); drive.remove(req.uid, r.drive_id);
   db.prepare('DELETE FROM items WHERE id=?').run(r.id); bus.emit(req.uid, 'delete', { id: r.id }); res.json({ ok: true }); }));
 app.get('/api/items/:id/file', auth, (req, res) => {
   const r = db.prepare('SELECT * FROM items WHERE id=? AND user_id=? AND storage_key IS NOT NULL').get(req.params.id, req.uid);
@@ -132,6 +132,10 @@ async function sweep() { const cut = Date.now() - cfg.retentionDays * 864e5;
   for (const r of db.prepare('SELECT id,storage_key k FROM items WHERE created_at<?').all(cut)) { if (r.k) await storage.remove(r.k); db.prepare('DELETE FROM items WHERE id=?').run(r.id); } }
 setInterval(sweep, 3600e3).unref(); sweep();
 
+// ---- Google Drive bridge ----
+app.get('/api/drive/connect', auth, (req, res) => drive.enabled ? res.redirect(drive.authUrl(req, req.uid)) : res.status(503).send('Drive not configured'));
+app.get('/api/drive/callback', async (req, res) => { try { await drive.callback(req); res.redirect('/?drive=ok'); } catch (e) { res.redirect('/?drive=fail'); } });
+app.post('/api/drive/disconnect', auth, (req, res) => { drive.disconnect(req.uid); res.json({ ok: true }); });
 app.get('/healthz', (req, res) => res.send('ok'));
 app.use(express.static(path.join(__dirname, '..', 'public'), { maxAge: '1h' }));
 app.use((e, req, res, next) => res.status(e.code === 'LIMIT_FILE_SIZE' ? 413 : 500).json({ error: e.code === 'LIMIT_FILE_SIZE' ? 'File too large' : 'Server error' }));
