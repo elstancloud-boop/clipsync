@@ -59,18 +59,21 @@ function connect() { es?.close(); es = new EventSource('/api/stream?d=' + encode
   es.addEventListener('delete', e => { items = items.filter(x => x.id !== JSON.parse(e.data).id); render(); }); }
 
 function drawDevs() { const n = devs.length, others = devs.filter(d => d.id !== myId).length, c = $('devchip');
-  c.className = others ? 'on' : ''; c.innerHTML = '<i>●</i> ' + (others ? others + 1 + ' devices' : 'Only this device');
+  c.className = others ? 'on' : ''; connUI(others, devs.filter(d => d.id !== myId).map(d => d.name).filter((v, i, a) => a.indexOf(v) === i).join(' + ')); c.innerHTML = '<i>●</i> ' + (others ? others + 1 + ' devices' : 'Only this device');
   const p = $('devpanel'); p.innerHTML = '<h3>Connected devices</h3>' + devs.map(d => `<div class="d"><span class="g">●</span><span>${esc(d.name)}${d.id === myId ? ' <small>(this device)</small>' : ''}</span></div>`).join('') +
     (others ? '' : '<small>No other device is connected yet.</small><div class="row"><button onclick="openPair()">＋ Connect another device</button></div>'); }
+function connUI(others, names) { const a = $('adddev'), e = $('emptyconn');
+  if (a) { a.className = others ? 'ok' : ''; a.innerHTML = others ? '<span class="dc"></span>' + esc(names) + ' connected' : '＋ Add device'; }
+  if (e) { e.className = 'big' + (others ? ' ok' : ''); e.innerHTML = others ? '<span class="dc"></span>' + esc(names) + ' connected. Send something!' : (isPhone ? '＋ Connect my computer' : '＋ Connect my phone'); } }
 $('devchip').onclick = e => { e.stopPropagation(); $('menu').style.display = 'none'; const p = $('devpanel'); p.style.display = p.style.display === 'block' ? 'none' : 'block'; };
 $('devpanel').onclick = e => e.stopPropagation();
 
 function emptyState() { const e = $('empty'); e.hidden = items.length > 0; if (items.length) return;
-  e.innerHTML = isPhone ? `<h3>You're in 🎉 Here's how it works</h3><ol class="steps"><li><div><b>Send from here:</b> tap <b>Paste</b> or <b>Files</b> above, or use Android's <b>Share</b> button in any app and pick ClipSync (install the app from ⋯ menu first).</div></li><li><div><b>On your computer:</b> open <b>${esc(location.host)}</b>, then tap <b>I have a code</b>.</div></li><li><div>Tap <b>＋ Add device</b> at the top to get your code.</div></li></ol><button class="big" onclick="openPair()">＋ Connect my computer</button>`
-  : `<h3>You're in 🎉 Here's how it works</h3><ol class="steps"><li><div><b>Connect your phone:</b> click <b>＋ Add device</b> and scan the QR code with your phone camera.</div></li><li><div><b>Send anything:</b> press <b>${/Mac/.test(device) ? '⌘' : 'Ctrl'}+V</b> on this page to paste text, images or files, or drag files here.</div></li><li><div><b>Get things back:</b> clips from your phone appear here instantly. Click any clip to copy it.</div></li></ol><button class="big" onclick="openPair()">＋ Connect my phone</button>`; }
+  e.innerHTML = isPhone ? `<h3>You're in 🎉 Here's how it works</h3><ol class="steps"><li><div><b>Send from here:</b> tap <b>Paste</b> or <b>Files</b> above, or use Android's <b>Share</b> button in any app and pick ClipSync (install the app from ⋯ menu first).</div></li><li><div><b>On your computer:</b> open <b>${esc(location.host)}</b>, then tap <b>I have a code</b>.</div></li><li><div>Tap <b>＋ Add device</b> at the top to get your code.</div></li></ol><button class="big" id="emptyconn" onclick="openPair()">＋ Connect my computer</button>`
+  : `<h3>You're in 🎉 Here's how it works</h3><ol class="steps"><li><div><b>Connect your phone:</b> click <b>＋ Add device</b> and scan the QR code with your phone camera.</div></li><li><div><b>Send anything:</b> press <b>${/Mac/.test(device) ? '⌘' : 'Ctrl'}+V</b> on this page to paste text, images or files, or drag files here.</div></li><li><div><b>Get things back:</b> clips from your phone appear here instantly. Click any clip to copy it.</div></li></ol><button class="big" id="emptyconn" onclick="openPair()">＋ Connect my phone</button>`; }
 window.openPair = openPair;
 
-function render() { emptyState(); $('list').innerHTML = '';
+function render() { emptyState(); setTimeout(drawDevs, 0); $('list').innerHTML = '';
   for (const i of items) { const c = document.createElement('div'); c.className = 'card clip' + (fresh.has(i.id) ? ' fresh' : ''); const u = `/api/items/${i.id}/file`; let body = '';
     if (i.kind === 'text') body = `<div class="txt">${esc(i.text)}</div>`;
     else if (i.kind === 'link') { let h = i.text; try { h = new URL(i.text.trim()).hostname; } catch {} body = `<div class="txt">🔗 <a href="${esc(i.text.trim())}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()">${esc(h)}</a><div class="hint">${esc(i.text.slice(0, 120))}</div></div>`; }
@@ -82,6 +85,8 @@ function render() { emptyState(); $('list').innerHTML = '';
     const row = c.lastChild, btn = (t, cls, fn) => { const b = document.createElement('button'); b.textContent = t; b.className = cls; b.onclick = e => { e.stopPropagation(); fn(); }; row.append(b); };
     const main = () => i.kind === 'image' ? copyImage(u) : i.text ? copyText(i.text) : (location.href = u + '?dl=1');
     c.onclick = main;
+    if (i.name) { c.draggable = true; c.ondragstart = e => { e.dataTransfer.effectAllowed = 'copy'; e.dataTransfer.setData('DownloadURL', (i.mime || 'application/octet-stream') + ':' + i.name + ':' + location.origin + u + '?dl=1'); }; }
+    else if (i.text) { c.draggable = true; c.ondragstart = e => e.dataTransfer.setData('text/plain', i.text); }
     if (i.kind === 'image') btn('Copy image', '', main); else if (i.text) btn('Copy', '', main); else btn('Save', '', main);
     if (i.name && i.kind !== 'file') btn('Save', 'sec', () => location.href = u + '?dl=1'); btn('🗑', 'x', () => removeClip(i)); $('list').append(c); }
   fresh.clear(); }
@@ -111,6 +116,15 @@ document.addEventListener('paste', e => { if ($('app').hidden) return; const fil
 let dc = 0; addEventListener('dragenter', e => { e.preventDefault(); dc++; $('drop').style.display = 'grid'; });
 addEventListener('dragleave', () => { if (--dc <= 0) $('drop').style.display = 'none'; }); addEventListener('dragover', e => e.preventDefault());
 addEventListener('drop', e => { e.preventDefault(); dc = 0; $('drop').style.display = 'none'; if (!$('app').hidden) send('', [...e.dataTransfer.files]); });
+$('bmbtn').onclick = async () => { try { const { token } = await api('/bm/token'); const code = "javascript:(function(){var s=document.createElement('script');s.src='" + location.origin + "/bm.js?t=" + token + "&r='+Date.now();document.body.appendChild(s)})();";
+    $('bmlink').setAttribute('href', code); $('bmlink').onclick = e => { e.preventDefault(); toast('Drag this button to your bookmarks bar'); }; $('bmcopy').onclick = async () => { try { await navigator.clipboard.writeText(code); toast('Bookmark copied ✓'); } catch { toast('Could not copy'); } };
+    $('bmm').style.display = 'grid'; } catch (e) { toast(e.message); } };
+$('bmclose').onclick = () => $('bmm').style.display = 'none';
+// mobile: when you come back to ClipSync, offer to send what you just copied
+let lastClip = localStorage.lastClip || '';
+async function clipOffer() { if (!isPhone || $('app').hidden || !navigator.clipboard?.readText) return; try { const t = (await navigator.clipboard.readText()).trim(); if (!t || t === lastClip) return;
+    lastClip = localStorage.lastClip = t; toast('Send what you copied?', 'Send', () => send(t, []), 8000); } catch {} }
+addEventListener('focus', clipOffer); document.addEventListener('visibilitychange', () => { if (!document.hidden) setTimeout(clipOffer, 400); });
 setInterval(() => { if (!$('app').hidden && !document.hidden) render(); }, 60000);
 addEventListener('visibilitychange', () => { if (!document.hidden && !$('app').hidden) start(); });
 start();

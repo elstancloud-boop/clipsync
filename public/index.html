@@ -33,6 +33,7 @@ header h1{font-size:17px;letter-spacing:.28em;text-transform:uppercase;font-weig
 .sw{display:flex;gap:10px;align-items:center;font-size:15px;color:var(--mu);margin-top:10px}.sw input{width:22px;height:22px}
 #devchip{font-size:14px;padding:8px 12px}#devchip i{color:#9aa7c2;font-style:normal}#devchip.on i{color:#16a34a}#devchip i{color:#b5b5c3}
 #devpanel{position:absolute;right:12px;top:56px;background:var(--card);color:var(--tx);border-radius:14px;box-shadow:0 6px 24px #0004;padding:14px;display:none;min-width:240px;max-width:90vw}#devpanel h3{margin:0 0 8px;font-size:17px}#devpanel div.d{display:flex;gap:8px;align-items:center;padding:6px 0}#devpanel .g{color:#16a34a}#devpanel small{color:var(--mu)}
+.dc{display:inline-block;width:9px;height:9px;border-radius:50%;background:#16a34a;margin-right:6px;box-shadow:0 0 0 0 #16a34a88;animation:pl 1.8s infinite}@keyframes pl{70%{box-shadow:0 0 0 8px #16a34a00}}\n.clip[draggable=true]{cursor:grab}\nbutton.ok{background:#e8f7ee!important;color:#136c34!important;border:1px solid #b7e4c7!important}
 </style></head><body>
 <div id="drop">Drop files to send</div>
 
@@ -49,7 +50,7 @@ header h1{font-size:17px;letter-spacing:.28em;text-transform:uppercase;font-weig
 
 <div id="app" hidden>
 <header><h1>ClipSync</h1><button id="devchip" aria-label="Connected devices"></button><button id="adddev">＋ Add device</button><button id="menubtn" aria-label="Menu">⋯</button>
-<div id="devpanel"></div><div id="menu"><button id="inst" hidden>📲 Install app on this device</button><button id="drv" hidden></button><button id="secure">🔒 Save my account (email)</button><button id="out">Log out</button><button id="del" style="color:var(--red)">Delete my account &amp; data</button></div></header>
+<div id="devpanel"></div><div id="menu"><button id="inst" hidden>📲 Install app on this device</button><button id="drv" hidden></button><button id="bmbtn">🔖 Attach from ClipSync on any website</button><button id="secure">🔒 Save my account (email)</button><button id="out">Log out</button><button id="del" style="color:var(--red)">Delete my account &amp; data</button></div></header>
 <div class="wrap">
 <div class="card"><textarea id="t" rows="2" placeholder="Type or paste text or a link…"></textarea>
 <div class="row"><button class="sec" id="pastebtn">📋 Paste</button><button class="sec" id="pick">📎 Files</button><button id="send">Send ➤</button></div>
@@ -68,5 +69,13 @@ header h1{font-size:17px;letter-spacing:.28em;text-transform:uppercase;font-weig
 <div class="modal" id="secm"><div class="card"><h2>Save your account</h2><p class="hint">Add an email and password so you never lose your clips if you lose a device.</p>
 <input id="sem" type="email" placeholder="Email"><div class="sp"></div><input id="spw" type="password" placeholder="Password (8+ characters)"><p class="err" id="serr"></p>
 <div class="row"><button class="sec" id="sclose">Cancel</button><button id="ssave">Save</button></div></div></div>
+<div class="modal" id="bmm"><div class="card"><h2>Attach from ClipSync on any website</h2>
+<p class="hint">No app, no login. Save this bookmark once. On any upload form, tap it, pick a clip, and it attaches.</p>
+<p class="center"><a id="bmlink" href="#" style="display:inline-block;padding:12px 20px;border-radius:999px;background:var(--tx);color:var(--bg);text-decoration:none;font-weight:600;cursor:grab">🔖 Attach from ClipSync</a></p>
+<ol class="steps"><li><div><b>Computer:</b> drag the black button onto your bookmarks bar (Cmd/Ctrl+Shift+B shows it).</div></li>
+<li><div><b>Android (Firefox):</b> tap <b>Copy bookmark</b> below, then ⋮ menu → Bookmarks → add a bookmark named "ClipSync" and paste the copied text as its address.</div></li>
+<li><div><b>Use it:</b> open any site's upload page, tap the bookmark, tap a clip.</div></li></ol>
+<p class="hint">Some sites (banks, Google, GitHub) block bookmarks like this. There, use drag out or Google Drive.</p>
+<div class="row"><button class="sec" id="bmcopy">Copy bookmark</button><button id="bmclose">Done</button></div></div></div>
 <div class="toast" id="toast"><span id="tmsg"></span><button id="tact" hidden></button></div>
 <script src="/app.js"></script></body></html>
