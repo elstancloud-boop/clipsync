@@ -37,10 +37,15 @@ $('adddev').onclick = openPair; $('pclose').onclick = () => { $('pairm').style.d
 
 // ---------- main ----------
 async function start() {
-  try { const me = await api('/me'); $('welcome').hidden = true; $('app').hidden = false; $('secure').hidden = !!me.email;
+  try { const me = await api('/me'); $('welcome').hidden = true; $('app').hidden = false; $('secure').hidden = !!me.email; setDrive(me);
     $('quota').textContent = `${sz(me.used)} of ${sz(me.quota)} used · clips auto-delete after ${me.retentionDays} days`;
     $('auto').checked = localStorage.auto === '1'; items = await api('/items'); render(); connect(); }
   catch { $('welcome').hidden = false; $('app').hidden = true; const c = new URLSearchParams(location.search).get('pair'); if (c) joinCode(c); } }
+function setDrive(me) { $('drv').hidden = !me.driveAvailable; $('drvbanner').hidden = !(me.driveAvailable && !me.drive);
+  $('drv').textContent = me.drive ? '☁ Google Drive connected (tap to disconnect)' : '☁ Send clips to Google Drive'; window.driveOn = me.drive; }
+const driveGo = async () => { if (window.driveOn) { if (confirm('Stop copying new clips to Google Drive? Files already in Drive stay there.')) { await post('/drive/disconnect'); start(); } } else location.href = '/api/drive/connect'; };
+$('drv').onclick = driveGo; $('drvgo').onclick = driveGo;
+{ const d = new URLSearchParams(location.search).get('drive'); if (d) { history.replaceState(null, '', '/'); setTimeout(() => toast(d === 'ok' ? 'Google Drive connected ✓ Clips now appear in your file picker under Drive → ClipSync' : 'Could not connect Google Drive. Please try again.', null, null, 6000), 800); } }
 $('auto').onchange = () => localStorage.auto = $('auto').checked ? '1' : '0';
 function connect() { es?.close(); es = new EventSource('/api/stream');
   es.addEventListener('item', e => { const i = JSON.parse(e.data); if (items.find(x => x.id === i.id)) return; items.unshift(i); fresh.add(i.id); render();
