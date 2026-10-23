@@ -44,7 +44,7 @@ app.post('/api/pair/join', limit(15, 600e3), (req, res) => {
   pairs.delete(code); setSession(res, { id: p.uid }); res.json({ ok: true }); });
 app.get('/api/pair/qr/:code', auth, async (req, res) => {
   const url = `${req.protocol}://${req.get('host')}/?pair=${encodeURIComponent(req.params.code)}`;
-  res.type('image/svg+xml').send(await QR.toString(url, { type: 'svg', margin: 1, color: { dark: '#0056d2' } })); });
+  res.type('image/svg+xml').send(await QR.toString(url, { type: 'svg', margin: 1, color: { dark: '#0b0b12' } })); });
 app.post('/api/upgrade', auth, limit(10, 3600e3), (req, res) => { // optional: add email+password to a guest account
   const email = String(req.body.email || '').trim().toLowerCase(), pw = String(req.body.password || '');
   if (!/^\S+@\S+\.\S+$/.test(email) || pw.length < 8) return res.status(400).json({ error: 'Enter a valid email and a password of 8+ characters' });
