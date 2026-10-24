@@ -7,6 +7,8 @@ const app = express(); app.disable('x-powered-by'); app.set('trust proxy', 1);
 app.use((req, res, next) => { res.set({ 'X-Content-Type-Options': 'nosniff', 'Referrer-Policy': 'same-origin',
   'X-Frame-Options': 'DENY' }); next(); });
 app.use(express.json({ limit: '1mb' }));
+// SEO: the onrender.com address is a duplicate of the real domain; send crawlers to it and keep it out of the index
+app.use((req, res, next) => { if (/\.onrender\.com$/i.test(req.hostname) && req.method === 'GET' && !req.path.startsWith('/api') && req.path !== '/healthz') { res.set('X-Robots-Tag', 'noindex'); if (/bot|crawl|spider|slurp|bing|duckduck|baidu|yandex/i.test(req.headers['user-agent'] || '')) return res.redirect(301, 'https://clipboardportal.com' + req.originalUrl); } next(); });
 const upload = multer({ dest: storage.tmpDir, limits: { fileSize: cfg.maxFileBytes, files: 10 } });
 
 // ---- tiny in-memory rate limiter (use Redis in multi-instance) ----
