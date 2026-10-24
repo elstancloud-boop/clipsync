@@ -1,5 +1,5 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>ClipSync – copy on your phone, paste on your computer</title><meta name="theme-color" content="#fbfcfd">
+<title>ClipboardPort – copy on your phone, paste on your computer</title><meta name="theme-color" content="#fbfcfd">
 <link rel="manifest" href="/manifest.webmanifest"><link rel="icon" href="/icon.svg">
 <style>
 :root{--b:#0b0b12;--bg:#fbfcfd;--card:#fff;--tx:#272735;--mu:#6b6b7b;--ln:#e6e6ec;--soft:#f1f1f5;--red:#b42318;--redbg:#fde8e8}
@@ -16,7 +16,7 @@ input:focus,textarea:focus{outline:2px solid #27273533;border-color:var(--tx)}
 #welcome{max-width:460px;margin:7vh auto 0;padding:20px}#welcome h1{font-size:34px;line-height:1.15}.logo{width:72px;height:72px;border-radius:18px}
 .sp{height:12px}.err{color:var(--red);min-height:22px;margin:6px 0}
 header{background:var(--card);color:var(--tx);border-bottom:1px solid var(--ln);padding:10px 16px;padding-top:max(10px,env(safe-area-inset-top));display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:5}
-header h1{font-size:17px;letter-spacing:.28em;text-transform:uppercase;font-weight:600;flex:1;margin:0}header button{background:var(--card);color:var(--tx);border:1px solid var(--ln);padding:8px 14px;min-height:40px}
+header h1{font-size:15px;letter-spacing:.16em;text-transform:uppercase;font-weight:600;flex:1;margin:0}header button{background:var(--card);color:var(--tx);border:1px solid var(--ln);padding:8px 14px;min-height:40px}
 #menu{position:absolute;right:12px;top:56px;background:var(--card);border-radius:14px;box-shadow:0 6px 24px #0004;padding:8px;display:none;min-width:230px}#menu button{width:100%;text-align:left;background:none;color:var(--tx);font-weight:500;margin:0}
 .meta{font-size:13px;color:var(--mu);margin-bottom:8px}.txt{white-space:pre-wrap;word-break:break-word;max-height:200px;overflow:auto;font-size:18px}
 .clip{cursor:pointer}.clip img,.clip video{max-width:100%;max-height:360px;border-radius:12px;display:block}.clip audio{width:100%}
@@ -43,24 +43,24 @@ header h1{font-size:17px;letter-spacing:.28em;text-transform:uppercase;font-weig
 <div class="sp"></div><button class="big" id="go">Get started — it's free</button>
 <div class="sp"></div><button class="big sec" id="havecode">I have a code from my other device</button>
 <div id="codebox" hidden><div class="sp"></div><input id="cin" inputmode="numeric" maxlength="7" placeholder="6-digit code" style="text-align:center;font-size:26px;letter-spacing:5px"><div class="sp"></div><button class="big" id="join">Connect</button></div>
-<p class="err" id="werr"></p>
+<p class="err" id="werr"></p><p class="hint" style="font-size:13px">By continuing you agree to our <a href="/terms">Terms</a> and <a href="/privacy">Privacy Policy</a>.</p>
 <button class="link" id="showlogin">Log in with email</button>
 <div id="loginbox" hidden><div class="sp"></div><input id="em" type="email" placeholder="Email" autocomplete="email"><div class="sp"></div><input id="pw" type="password" placeholder="Password" autocomplete="current-password"><div class="sp"></div><button class="big sec" id="login">Log in</button></div>
 </div>
 
 <div id="app" hidden>
-<header><h1>ClipSync</h1><button id="devchip" aria-label="Connected devices"></button><button id="adddev">＋ Add device</button><button id="menubtn" aria-label="Menu">⋯</button>
-<div id="devpanel"></div><div id="menu"><button id="inst" hidden>📲 Install app on this device</button><button id="drv" hidden></button><button id="bmbtn">🔖 Attach from ClipSync on any website</button><button id="secure">🔒 Save my account (email)</button><button id="out">Log out</button><button id="del" style="color:var(--red)">Delete my account &amp; data</button></div></header>
+<header><h1>ClipboardPort</h1><button id="devchip" aria-label="Connected devices"></button><button id="adddev">＋ Add device</button><button id="menubtn" aria-label="Menu">⋯</button>
+<div id="devpanel"></div><div id="menu"><button id="inst" hidden>📲 Install app on this device</button><button id="drv" hidden></button><button id="bmbtn">🔖 Attach from ClipboardPort on any website</button><button id="secure">🔒 Save my account (email)</button><button id="out">Log out</button><button id="del" style="color:var(--red)">Delete my account &amp; data</button></div></header>
 <div class="wrap">
 <div class="card"><textarea id="t" rows="2" placeholder="Type or paste text or a link…"></textarea>
 <div class="row"><button class="sec" id="pastebtn">📋 Paste</button><button class="sec" id="pick">📎 Files</button><button id="send">Send ➤</button></div>
 <input id="f" type="file" multiple hidden><div class="prog" id="prog"><i></i></div>
 <label class="sw"><input type="checkbox" id="autosave"> <span><b>Auto-Drop:</b> save files from my other devices straight to this device's Downloads, so they appear in every upload picker (Recent / Downloads)</span></label>
 <label class="sw"><input type="checkbox" id="auto"> Auto-copy clips arriving from my other devices</label></div>
-<div id="drvbanner" class="card" hidden><b>☁ Use these clips in any upload form</b><p class="hint" style="margin:6px 0">Connect Google Drive and every clip also appears in your phone's file picker under Drive → ClipSync. No downloading.</p><button id="drvgo">Connect Google Drive</button></div>
+<div id="drvbanner" class="card" hidden><b>☁ Use these clips in any upload form</b><p class="hint" style="margin:6px 0">Connect Google Drive and every clip also appears in your phone's file picker under Drive → ClipboardPort. No downloading.</p><button id="drvgo">Connect Google Drive</button></div>
 <div id="empty" class="card" hidden></div>
 <div id="list"></div>
-<p class="hint center" id="quota"></p>
+<p class="hint center" id="quota"></p><p class="hint center" style="font-size:13px"><a href="/terms">Terms</a> · <a href="/privacy">Privacy</a></p>
 </div></div>
 
 <div class="modal" id="pairm"><div class="card center"><h2>Connect another device</h2>
@@ -70,11 +70,11 @@ header h1{font-size:17px;letter-spacing:.28em;text-transform:uppercase;font-weig
 <div class="modal" id="secm"><div class="card"><h2>Save your account</h2><p class="hint">Add an email and password so you never lose your clips if you lose a device.</p>
 <input id="sem" type="email" placeholder="Email"><div class="sp"></div><input id="spw" type="password" placeholder="Password (8+ characters)"><p class="err" id="serr"></p>
 <div class="row"><button class="sec" id="sclose">Cancel</button><button id="ssave">Save</button></div></div></div>
-<div class="modal" id="bmm"><div class="card"><h2>Attach from ClipSync on any website</h2>
+<div class="modal" id="bmm"><div class="card"><h2>Attach from ClipboardPort on any website</h2>
 <p class="hint">No app, no login. Save this bookmark once. On any upload form, tap it, pick a clip, and it attaches.</p>
-<p class="center"><a id="bmlink" href="#" style="display:inline-block;padding:12px 20px;border-radius:999px;background:var(--tx);color:var(--bg);text-decoration:none;font-weight:600;cursor:grab">🔖 Attach from ClipSync</a></p>
+<p class="center"><a id="bmlink" href="#" style="display:inline-block;padding:12px 20px;border-radius:999px;background:var(--tx);color:var(--bg);text-decoration:none;font-weight:600;cursor:grab">🔖 Attach from ClipboardPort</a></p>
 <ol class="steps"><li><div><b>Computer:</b> drag the black button onto your bookmarks bar (Cmd/Ctrl+Shift+B shows it).</div></li>
-<li><div><b>Android (Firefox):</b> tap <b>Copy bookmark</b> below, then ⋮ menu → Bookmarks → add a bookmark named "ClipSync" and paste the copied text as its address.</div></li>
+<li><div><b>Android (Firefox):</b> tap <b>Copy bookmark</b> below, then ⋮ menu → Bookmarks → add a bookmark named "ClipboardPort" and paste the copied text as its address.</div></li>
 <li><div><b>Use it:</b> open any site's upload page, tap the bookmark, tap a clip.</div></li></ol>
 <p class="hint">Some sites (banks, Google, GitHub) block bookmarks like this. There, use drag out or Google Drive.</p>
 <div class="row"><button class="sec" id="bmcopy">Copy bookmark</button><button id="bmclose">Done</button></div></div></div>

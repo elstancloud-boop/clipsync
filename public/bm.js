@@ -1,10 +1,10 @@
-// ClipSync "Attach from ClipSync" bookmarklet panel. Loaded onto any website by the bookmark.
+// ClipboardPort "Attach from ClipboardPort" bookmarklet panel. Loaded onto any website by the bookmark.
 (function () {
   var cs = document.currentScript, u = new URL(cs.src), T = u.searchParams.get('t'), O = u.origin;
   if (window.__csb) { window.__csb.remove(); window.__csb = null; return; }
   var h = document.createElement('div'); window.__csb = h; var armed = null;
   h.style.cssText = 'position:fixed;z-index:2147483647;right:12px;bottom:12px;width:min(350px,92vw);max-height:72vh;overflow:auto;background:#fff;color:#272735;border:1px solid #e6e6ec;border-radius:16px;box-shadow:0 8px 30px #0006;font:15px/1.4 system-ui,sans-serif;padding:12px;box-sizing:border-box';
-  h.innerHTML = '<div style="display:flex;align-items:center"><b style="letter-spacing:.2em;font-size:13px;flex:1">CLIPSYNC</b><span id="csx" style="cursor:pointer;padding:4px 8px">✕</span></div><div id="csm" style="color:#6b6b7b;font-size:13px;margin:6px 0">Tap a clip to attach it to this page.</div><div id="csl">Loading…</div>';
+  h.innerHTML = '<div style="display:flex;align-items:center"><b style="letter-spacing:.2em;font-size:13px;flex:1">CLIPBOARDPORT</b><span id="csx" style="cursor:pointer;padding:4px 8px">✕</span></div><div id="csm" style="color:#6b6b7b;font-size:13px;margin:6px 0">Tap a clip to attach it to this page.</div><div id="csl">Loading…</div>';
   document.body.appendChild(h);
   var $ = function (i) { return h.querySelector('#' + i); }; $('csx').onclick = function () { cleanup(); };
   function msg(t, bad) { var m = $('csm'); m.textContent = t; m.style.color = bad ? '#b42318' : '#6b6b7b'; }
@@ -40,7 +40,7 @@
     else if (navigator.clipboard) navigator.clipboard.writeText(t).then(function () { msg('✓ Copied. Now paste it where you want.'); }, function () { msg('Could not copy', true); });
   }
   fetch(O + '/api/bm/items?t=' + T).then(function (r) { if (!r.ok) throw 0; return r.json(); }).then(function (items) {
-    var L = $('csl'); L.innerHTML = ''; if (!items.length) { L.textContent = 'No clips yet. Send something from ClipSync first.'; return; }
+    var L = $('csl'); L.innerHTML = ''; if (!items.length) { L.textContent = 'No clips yet. Send something from ClipboardPort first.'; return; }
     items.slice(0, 40).forEach(function (i) {
       var d = document.createElement('div'); d.style.cssText = 'border:1px solid #e6e6ec;border-radius:12px;padding:8px 10px;margin:6px 0;cursor:pointer;word-break:break-word';
       var icon = { image: '🖼', audio: '🎵', video: '🎬', file: '📄', link: '🔗', text: '📝' }[i.kind];
@@ -50,5 +50,5 @@
         msg('Fetching…'); fetch(O + '/api/bm/file/' + i.id + '?t=' + T).then(function (r) { return r.blob(); }).then(function (b) { attach(new File([b], i.name, { type: i.mime || b.type }), null); }).catch(function () { msg('Could not fetch the file', true); });
       }; L.appendChild(d);
     });
-  }).catch(function () { $('csl').textContent = 'Could not load clips. Open ClipSync and re-create the bookmark.'; });
+  }).catch(function () { $('csl').textContent = 'Could not load clips. Open ClipboardPort and re-create the bookmark.'; });
 })();
