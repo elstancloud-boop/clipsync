@@ -1,4 +1,4 @@
-// Drive Bridge: mirrors every clip into the user's own Google Drive ("ClipboardPort" folder) so it shows up
+// Drive Bridge: mirrors every clip into the user's own Google Drive ("ClipboardPortal" folder) so it shows up
 // in Android's system file picker under Drive. Scope drive.file = app can only touch files it created.
 const jwt = require('jsonwebtoken'); const fs = require('fs'); const path = require('path');
 const cfg = require('./config'); const db = require('./db');
@@ -36,7 +36,7 @@ async function folder(uid, tok, reset) {
   const row = db.prepare('SELECT folder_id f FROM drive WHERE user_id=?').get(uid);
   if (row.f && !reset) return row.f;
   const r = await fetch('https://www.googleapis.com/drive/v3/files', { method: 'POST', headers: { authorization: 'Bearer ' + tok, 'content-type': 'application/json' },
-    body: JSON.stringify({ name: 'ClipboardPort', mimeType: 'application/vnd.google-apps.folder' }) });
+    body: JSON.stringify({ name: 'ClipboardPortal', mimeType: 'application/vnd.google-apps.folder' }) });
   const j = await r.json(); if (!j.id) throw new Error('folder failed');
   db.prepare('UPDATE drive SET folder_id=? WHERE user_id=?').run(j.id, uid); return j.id;
 }
