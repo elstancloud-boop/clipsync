@@ -1,4 +1,4 @@
-{"name":"ClipboardPort","short_name":"ClipboardPort","start_url":"/","display":"standalone","background_color":"#ffffff","theme_color":"#fbfcfd",
+{"name":"ClipboardPortal","short_name":"ClipboardPortal","start_url":"/","display":"standalone","background_color":"#ffffff","theme_color":"#fbfcfd",
 "icons":[{"src":"/icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}],
 "share_target":{"action":"/share","method":"POST","enctype":"multipart/form-data",
 "params":{"title":"title","text":"text","url":"url","files":[{"name":"files","accept":["*/*"]}]}}}

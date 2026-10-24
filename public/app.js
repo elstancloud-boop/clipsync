@@ -47,7 +47,7 @@ function setDrive(me) { $('drv').hidden = !me.driveAvailable; $('drvbanner').hid
   $('drv').textContent = me.drive ? '☁ Google Drive connected (tap to disconnect)' : '☁ Send clips to Google Drive'; window.driveOn = me.drive; }
 const driveGo = async () => { if (window.driveOn) { if (confirm('Stop copying new clips to Google Drive? Files already in Drive stay there.')) { await post('/drive/disconnect'); start(); } } else location.href = '/api/drive/connect'; };
 $('drv').onclick = driveGo; $('drvgo').onclick = driveGo;
-{ const d = new URLSearchParams(location.search).get('drive'); if (d) { history.replaceState(null, '', '/'); setTimeout(() => toast(d === 'ok' ? 'Google Drive connected ✓ Clips now appear in your file picker under Drive → ClipboardPort' : 'Could not connect Google Drive. Please try again.', null, null, 6000), 800); } }
+{ const d = new URLSearchParams(location.search).get('drive'); if (d) { history.replaceState(null, '', '/'); setTimeout(() => toast(d === 'ok' ? 'Google Drive connected ✓ Clips now appear in your file picker under Drive → ClipboardPortal' : 'Could not connect Google Drive. Please try again.', null, null, 6000), 800); } }
 const savedIds = new Set(JSON.parse(localStorage.savedIds || '[]'));
 function dropSave(i, quiet) { if (!i.name || savedIds.has(i.id)) return; savedIds.add(i.id); localStorage.savedIds = JSON.stringify([...savedIds].slice(-300));
   const a = document.createElement('a'); a.href = '/api/items/' + i.id + '/file?dl=1'; a.download = i.name; document.body.append(a); a.click(); a.remove();
@@ -75,7 +75,7 @@ $('devchip').onclick = e => { e.stopPropagation(); $('menu').style.display = 'no
 $('devpanel').onclick = e => e.stopPropagation();
 
 function emptyState() { const e = $('empty'); e.hidden = items.length > 0; if (items.length) return;
-  e.innerHTML = isPhone ? `<h3>You're in 🎉 Here's how it works</h3><ol class="steps"><li><div><b>Send from here:</b> tap <b>Paste</b> or <b>Files</b> above, or use Android's <b>Share</b> button in any app and pick ClipboardPort (install the app from ⋯ menu first).</div></li><li><div><b>On your computer:</b> open <b>${esc(location.host)}</b>, then tap <b>I have a code</b>.</div></li><li><div>Tap <b>＋ Add device</b> at the top to get your code.</div></li></ol><button class="big" id="emptyconn" onclick="openPair()">＋ Connect my computer</button>`
+  e.innerHTML = isPhone ? `<h3>You're in 🎉 Here's how it works</h3><ol class="steps"><li><div><b>Send from here:</b> tap <b>Paste</b> or <b>Files</b> above, or use Android's <b>Share</b> button in any app and pick ClipboardPortal (install the app from ⋯ menu first).</div></li><li><div><b>On your computer:</b> open <b>${esc(location.host)}</b>, then tap <b>I have a code</b>.</div></li><li><div>Tap <b>＋ Add device</b> at the top to get your code.</div></li></ol><button class="big" id="emptyconn" onclick="openPair()">＋ Connect my computer</button>`
   : `<h3>You're in 🎉 Here's how it works</h3><ol class="steps"><li><div><b>Connect your phone:</b> click <b>＋ Add device</b> and scan the QR code with your phone camera.</div></li><li><div><b>Send anything:</b> press <b>${/Mac/.test(device) ? '⌘' : 'Ctrl'}+V</b> on this page to paste text, images or files, or drag files here.</div></li><li><div><b>Get things back:</b> clips from your phone appear here instantly. Click any clip to copy it.</div></li></ol><button class="big" id="emptyconn" onclick="openPair()">＋ Connect my phone</button>`; }
 window.openPair = openPair;
 
@@ -126,7 +126,7 @@ $('bmbtn').onclick = async () => { try { const { token } = await api('/bm/token'
     $('bmlink').setAttribute('href', code); $('bmlink').onclick = e => { e.preventDefault(); toast('Drag this button to your bookmarks bar'); }; $('bmcopy').onclick = async () => { try { await navigator.clipboard.writeText(code); toast('Bookmark copied ✓'); } catch { toast('Could not copy'); } };
     $('bmm').style.display = 'grid'; } catch (e) { toast(e.message); } };
 $('bmclose').onclick = () => $('bmm').style.display = 'none';
-// mobile: when you come back to ClipboardPort, offer to send what you just copied
+// mobile: when you come back to ClipboardPortal, offer to send what you just copied
 let lastClip = localStorage.lastClip || '';
 async function clipOffer() { if (!isPhone || $('app').hidden || !navigator.clipboard?.readText) return; try { const t = (await navigator.clipboard.readText()).trim(); if (!t || t === lastClip) return;
     lastClip = localStorage.lastClip = t; toast('Send what you copied?', 'Send', () => send(t, []), 8000); } catch {} }

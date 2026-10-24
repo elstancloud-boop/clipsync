@@ -1,5 +1,5 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>ClipboardPort – copy on your phone, paste on your computer</title><meta name="theme-color" content="#fbfcfd">
+<title>ClipboardPortal – copy on your phone, paste on your computer</title><meta name="theme-color" content="#fbfcfd">
 <link rel="manifest" href="/manifest.webmanifest"><link rel="icon" href="/icon.svg">
 <style>
 :root{--b:#0b0b12;--bg:#fbfcfd;--card:#fff;--tx:#272735;--mu:#6b6b7b;--ln:#e6e6ec;--soft:#f1f1f5;--red:#b42318;--redbg:#fde8e8}
@@ -49,15 +49,15 @@ header h1{font-size:15px;letter-spacing:.16em;text-transform:uppercase;font-weig
 </div>
 
 <div id="app" hidden>
-<header><h1>ClipboardPort</h1><button id="devchip" aria-label="Connected devices"></button><button id="adddev">＋ Add device</button><button id="menubtn" aria-label="Menu">⋯</button>
-<div id="devpanel"></div><div id="menu"><button id="inst" hidden>📲 Install app on this device</button><button id="drv" hidden></button><button id="bmbtn">🔖 Attach from ClipboardPort on any website</button><button id="secure">🔒 Save my account (email)</button><button id="out">Log out</button><button id="del" style="color:var(--red)">Delete my account &amp; data</button></div></header>
+<header><h1>ClipboardPortal</h1><button id="devchip" aria-label="Connected devices"></button><button id="adddev">＋ Add device</button><button id="menubtn" aria-label="Menu">⋯</button>
+<div id="devpanel"></div><div id="menu"><button id="inst" hidden>📲 Install app on this device</button><button id="drv" hidden></button><button id="bmbtn">🔖 Attach from ClipboardPortal on any website</button><button id="secure">🔒 Save my account (email)</button><button id="out">Log out</button><button id="del" style="color:var(--red)">Delete my account &amp; data</button></div></header>
 <div class="wrap">
 <div class="card"><textarea id="t" rows="2" placeholder="Type or paste text or a link…"></textarea>
 <div class="row"><button class="sec" id="pastebtn">📋 Paste</button><button class="sec" id="pick">📎 Files</button><button id="send">Send ➤</button></div>
 <input id="f" type="file" multiple hidden><div class="prog" id="prog"><i></i></div>
 <label class="sw"><input type="checkbox" id="autosave"> <span><b>Auto-Drop:</b> save files from my other devices straight to this device's Downloads, so they appear in every upload picker (Recent / Downloads)</span></label>
 <label class="sw"><input type="checkbox" id="auto"> Auto-copy clips arriving from my other devices</label></div>
-<div id="drvbanner" class="card" hidden><b>☁ Use these clips in any upload form</b><p class="hint" style="margin:6px 0">Connect Google Drive and every clip also appears in your phone's file picker under Drive → ClipboardPort. No downloading.</p><button id="drvgo">Connect Google Drive</button></div>
+<div id="drvbanner" class="card" hidden><b>☁ Use these clips in any upload form</b><p class="hint" style="margin:6px 0">Connect Google Drive and every clip also appears in your phone's file picker under Drive → ClipboardPortal. No downloading.</p><button id="drvgo">Connect Google Drive</button></div>
 <div id="empty" class="card" hidden></div>
 <div id="list"></div>
 <p class="hint center" id="quota"></p><p class="hint center" style="font-size:13px"><a href="/terms">Terms</a> · <a href="/privacy">Privacy</a></p>
@@ -70,11 +70,11 @@ header h1{font-size:15px;letter-spacing:.16em;text-transform:uppercase;font-weig
 <div class="modal" id="secm"><div class="card"><h2>Save your account</h2><p class="hint">Add an email and password so you never lose your clips if you lose a device.</p>
 <input id="sem" type="email" placeholder="Email"><div class="sp"></div><input id="spw" type="password" placeholder="Password (8+ characters)"><p class="err" id="serr"></p>
 <div class="row"><button class="sec" id="sclose">Cancel</button><button id="ssave">Save</button></div></div></div>
-<div class="modal" id="bmm"><div class="card"><h2>Attach from ClipboardPort on any website</h2>
+<div class="modal" id="bmm"><div class="card"><h2>Attach from ClipboardPortal on any website</h2>
 <p class="hint">No app, no login. Save this bookmark once. On any upload form, tap it, pick a clip, and it attaches.</p>
-<p class="center"><a id="bmlink" href="#" style="display:inline-block;padding:12px 20px;border-radius:999px;background:var(--tx);color:var(--bg);text-decoration:none;font-weight:600;cursor:grab">🔖 Attach from ClipboardPort</a></p>
+<p class="center"><a id="bmlink" href="#" style="display:inline-block;padding:12px 20px;border-radius:999px;background:var(--tx);color:var(--bg);text-decoration:none;font-weight:600;cursor:grab">🔖 Attach from ClipboardPortal</a></p>
 <ol class="steps"><li><div><b>Computer:</b> drag the black button onto your bookmarks bar (Cmd/Ctrl+Shift+B shows it).</div></li>
-<li><div><b>Android (Firefox):</b> tap <b>Copy bookmark</b> below, then ⋮ menu → Bookmarks → add a bookmark named "ClipboardPort" and paste the copied text as its address.</div></li>
+<li><div><b>Android (Firefox):</b> tap <b>Copy bookmark</b> below, then ⋮ menu → Bookmarks → add a bookmark named "ClipboardPortal" and paste the copied text as its address.</div></li>
 <li><div><b>Use it:</b> open any site's upload page, tap the bookmark, tap a clip.</div></li></ol>
 <p class="hint">Some sites (banks, Google, GitHub) block bookmarks like this. There, use drag out or Google Drive.</p>
 <div class="row"><button class="sec" id="bmcopy">Copy bookmark</button><button id="bmclose">Done</button></div></div></div>
