@@ -23,7 +23,7 @@ const cookie = (req, n) => (req.headers.cookie || '').split(/;\s*/).map(c => c.s
 const setSession = (res, u) => res.cookie('cs', jwt.sign({ uid: u.id }, cfg.jwtSecret, { expiresIn: '90d' }),
   { httpOnly: true, sameSite: 'lax', secure: cfg.prod, maxAge: 90 * 864e5 });
 const auth = (req, res, next) => { try { req.uid = jwt.verify(cookie(req, 'cs'), cfg.jwtSecret).uid;
-    if (!db.prepare('SELECT 1 FROM users WHERE id=?').get(req.uid)) throw 0; next(); } // stale cookie after a data reset
+    if (!db.prepare('SELECT 1 FROM users WHERE id=?').get(req.uid)) db.prepare('INSERT INTO users(id,created_at) VALUES(?,?)').run(req.uid, Date.now()); next(); } // free-tier restart wiped the DB: silently re-create the guest account so paired devices stay paired
   catch { res.status(401).json({ error: 'Not signed in' }); } };
 // CSRF: state-changing requests must come from our own origin
 app.use((req, res, next) => { if (req.method === 'GET') return next(); const o = req.headers.origin;
