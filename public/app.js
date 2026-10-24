@@ -39,7 +39,7 @@ $('adddev').onclick = openPair; $('pclose').onclick = () => closePair(false);
 
 // ---------- main ----------
 async function start() {
-  try { const me = await api('/me'); $('welcome').hidden = true; $('app').hidden = false; $('secure').hidden = !!me.email; setDrive(me);
+  try { const me = await api('/me'); $('welcome').hidden = true; $('app').hidden = false; $('seo').hidden = true; $('secure').hidden = !!me.email; setDrive(me);
     $('quota').textContent = `${sz(me.used)} of ${sz(me.quota)} used · clips auto-delete after ${me.retentionDays} days`;
     $('auto').checked = localStorage.auto === '1'; items = await api('/items'); if (!localStorage.savedIds) items.forEach(i => savedIds.add(i.id)); render(); connect(); }
   catch { $('welcome').hidden = false; $('app').hidden = true; const c = new URLSearchParams(location.search).get('pair'); if (c) joinCode(c); } }
