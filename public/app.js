@@ -54,6 +54,9 @@ const savedIds = new Set(JSON.parse(localStorage.savedIds || '[]'));
 function dropSave(i, quiet) { if (!i.name || savedIds.has(i.id)) return; savedIds.add(i.id); localStorage.savedIds = JSON.stringify([...savedIds].slice(-300));
   const a = document.createElement('a'); a.href = '/api/items/' + i.id + '/file?dl=1'; a.download = i.name; document.body.append(a); a.click(); a.remove();
   if (!quiet) toast('📥 ' + i.name + ' saved to Downloads. Pick it in any upload: Recent or Downloads.', null, null, 5000); }
+
+function saveAllNow() { const todo = items.filter(i => i.name && i.kind !== 'text' && i.kind !== 'link'); if (!todo.length) return toast('No files to save yet'); let n = 0; todo.slice(0, 20).forEach((i, k) => setTimeout(() => { savedIds.add(i.id); const a = document.createElement('a'); a.href = '/api/items/' + i.id + '/file?dl=1'; a.download = i.name; document.body.append(a); a.click(); a.remove(); }, k * 700)); toast('Saving ' + Math.min(todo.length, 20) + ' file(s) to Downloads. If Chrome asks, tap Allow.', null, null, 6000); localStorage.savedIds = JSON.stringify([...savedIds].slice(-300)); }
+if ($('saveall')) $('saveall').onclick = saveAllNow;
 $('autosave').checked = localStorage.autosave ? localStorage.autosave === '1' : true;
 $('autosave').onchange = () => { localStorage.autosave = $('autosave').checked ? '1' : '0'; if ($('autosave').checked) { items.forEach(i => savedIds.add(i.id)); toast('Auto-Drop on. If Chrome asks, allow multiple downloads.', null, null, 5000); } };
 $('auto').onchange = () => localStorage.auto = $('auto').checked ? '1' : '0';
