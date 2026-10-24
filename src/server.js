@@ -128,8 +128,8 @@ const fileH = (req, res) => {
   if (m) { const s = m[1] ? +m[1] : 0, e = m[2] ? +m[2] : r.size - 1;
     if (s > e || e >= r.size) return res.status(416).end();
     res.status(206).set({ 'Content-Range': `bytes ${s}-${e}/${r.size}`, 'Content-Length': e - s + 1 });
-    return require('fs').createReadStream(path.join(cfg.dataDir, 'blobs', r.storage_key), { start: s, end: e }).pipe(res); }
-  res.set('Content-Length', r.size); storage.stream(r.storage_key).pipe(res); };
+    return storage.ensure(r.storage_key).then(f => require('fs').createReadStream(f, { start: s, end: e }).pipe(res)).catch(() => res.sendStatus(404)); }
+  res.set('Content-Length', r.size); storage.ensure(r.storage_key).then(f => require('fs').createReadStream(f).pipe(res)).catch(() => res.sendStatus(404)); };
 app.get('/api/items/:id/file', auth, fileH);
 app.get('/api/bm/file/:id', bmAuth, fileH);
 app.get('/api/stream', auth, (req, res) => {
