@@ -4,7 +4,7 @@
   "description": "Copy on your phone, paste on your PC. Cross-device clipboard for text, links, images, audio, video and files.",
   "main": "src/server.js",
   "scripts": {
-    "start": "node src/server.js",
+    "start": "node src/boot.js",
     "test": "node test/smoke.js"
   },
   "engines": {
