@@ -61,7 +61,7 @@ function connect() { es?.close(); es = new EventSource('/api/stream?d=' + encode
     if ($('pairm').style.display === 'grid' && devs.filter(x => x.id !== myId).length > pairBase) closePair(true);
     if (d.left && d.left.id !== myId) toast(d.left.name + ' went offline', null, null, 2500); });
   es.addEventListener('item', e => { const i = JSON.parse(e.data); if (items.find(x => x.id === i.id)) return; items.unshift(i); fresh.add(i.id); render();
-    const mine = i.device === device; if (!mine && $('autosave').checked) dropSave(i); if (!mine && $('auto').checked && i.text) copyText(i.text, true); else if (!mine) toast('New clip from ' + (i.device || 'another device')); });
+    const mine = String(i.device||'').endsWith('#'+myId.slice(0,8)); if (!mine && $('autosave').checked) dropSave(i); if (!mine && $('auto').checked && i.text) copyText(i.text, true); else if (!mine) toast('New clip from ' + String(i.device || 'another device').split('#')[0]); });
   es.addEventListener('delete', e => { items = items.filter(x => x.id !== JSON.parse(e.data).id); render(); }); }
 
 function drawDevs() { const n = devs.length, others = devs.filter(d => d.id !== myId).length, c = $('devchip');
@@ -76,7 +76,7 @@ $('devpanel').onclick = e => e.stopPropagation();
 
 function emptyState() { const e = $('empty'); e.hidden = items.length > 0; if (items.length) return;
   e.innerHTML = isPhone ? `<h3>You're in 🎉 Here's how it works</h3><ol class="steps"><li><div><b>Send from here:</b> tap <b>Paste</b> or <b>Files</b> above, or use Android's <b>Share</b> button in any app and pick ClipboardPortal (install the app from ⋯ menu first).</div></li><li><div><b>On your computer:</b> open <b>${esc(location.host)}</b>, then tap <b>I have a code</b>.</div></li><li><div>Tap <b>＋ Add device</b> at the top to get your code.</div></li></ol><button class="big" id="emptyconn" onclick="openPair()">＋ Connect my computer</button>`
-  : `<h3>You're in 🎉 Here's how it works</h3><ol class="steps"><li><div><b>Connect your phone:</b> click <b>＋ Add device</b> and scan the QR code with your phone camera.</div></li><li><div><b>Send anything:</b> press <b>${/Mac/.test(device) ? '⌘' : 'Ctrl'}+V</b> on this page to paste text, images or files, or drag files here.</div></li><li><div><b>Get things back:</b> clips from your phone appear here instantly. Click any clip to copy it.</div></li></ol><button class="big" id="emptyconn" onclick="openPair()">＋ Connect my phone</button>`; }
+  : `<h3>You're in 🎉 Here's how it works</h3><ol class="steps"><li><div><b>Connect any device:</b> click <b>＋ Add device</b>. Scan the QR code with a phone, or open clipboardportal.com on another computer and enter the 6-digit code.</div></li><li><div><b>Send anything:</b> press <b>${/Mac/.test(device) ? '⌘' : 'Ctrl'}+V</b> on this page to paste text, images or files, or drag files here.</div></li><li><div><b>Get things back:</b> clips from your phone appear here instantly. Click any clip to copy it.</div></li></ol><button class="big" id="emptyconn" onclick="openPair()">＋ Connect my phone</button>`; }
 window.openPair = openPair;
 
 function render() { emptyState(); setTimeout(drawDevs, 0); $('list').innerHTML = '';
@@ -87,7 +87,7 @@ function render() { emptyState(); setTimeout(drawDevs, 0); $('list').innerHTML =
     else if (i.kind === 'video') body = `<video controls playsinline preload="metadata" src="${u}" onclick="event.stopPropagation()"></video>`;
     else if (i.kind === 'audio') body = `<audio controls preload="metadata" src="${u}" onclick="event.stopPropagation()"></audio>`;
     else body = `<div class="file"><b>📄</b><span>${esc(i.name)}</span></div>`;
-    c.innerHTML = `<div class="meta">${i.name && i.kind !== 'file' ? esc(i.name) + ' · ' : ''}${i.size ? sz(i.size) + ' · ' : ''}from ${esc(i.device || 'a device')} · ${ago(i.createdAt)}</div>${body}<div class="row"></div>`;
+    c.innerHTML = `<div class="meta">${i.name && i.kind !== 'file' ? esc(i.name) + ' · ' : ''}${i.size ? sz(i.size) + ' · ' : ''}from ${esc(String(i.device || 'a device').split('#')[0])} · ${ago(i.createdAt)}</div>${body}<div class="row"></div>`;
     const row = c.lastChild, btn = (t, cls, fn) => { const b = document.createElement('button'); b.textContent = t; b.className = cls; b.onclick = e => { e.stopPropagation(); fn(); }; row.append(b); };
     const main = () => i.kind === 'image' ? copyImage(u) : i.text ? copyText(i.text) : (location.href = u + '?dl=1');
     c.onclick = main;
@@ -107,7 +107,7 @@ function upload(fd) { return new Promise((res, rej) => { const x = new XMLHttpRe
   x.upload.onprogress = e => { p.style.display = 'block'; bar.style.width = (e.loaded / e.total * 100) + '%'; };
   x.onload = () => { p.style.display = 'none'; let j = {}; try { j = JSON.parse(x.responseText); } catch {} x.status < 300 ? res(j) : rej(new Error(j.error || 'Upload failed')); };
   x.onerror = () => { p.style.display = 'none'; rej(new Error('No internet connection')); }; x.send(fd); }); }
-async function send(text, files) { if (!text && !files.length) return toast('Type or paste something first'); const fd = new FormData(); fd.append('device', device); if (text) fd.append('text', text); files.forEach(f => fd.append('files', f, f.name));
+async function send(text, files) { if (!text && !files.length) return toast('Type or paste something first'); const fd = new FormData(); fd.append('device', device + '#' + myId.slice(0,8)); if (text) fd.append('text', text); files.forEach(f => fd.append('files', f, f.name));
   try { toast(files.length ? 'Uploading…' : 'Sending…', null, null, 60000); const out = await upload(fd); out.forEach(i => { if (!items.find(x => x.id === i.id)) { items.unshift(i); fresh.add(i.id); } }); render(); toast('Sent ✓ — it is on your other devices now'); return true; }
   catch (e) { toast(e.message); } }
 $('send').onclick = async () => { if (await send($('t').value.trim(), [])) $('t').value = ''; };
