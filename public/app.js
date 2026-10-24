@@ -16,9 +16,9 @@ let deferredInstall; addEventListener('beforeinstallprompt', e => { e.preventDef
 $('inst').onclick = () => deferredInstall?.prompt();
 
 // ---------- welcome / sign-in ----------
-$('go').onclick = async () => { try { await post('/start'); start(); } catch (e) { $('werr').textContent = e.message; } };
+$('go').onclick = async () => { try { await post('/start'); track('sign_up',{method:'guest'}); start(); } catch (e) { $('werr').textContent = e.message; } };
 $('havecode').onclick = () => { $('codebox').hidden = false; $('cin').focus(); };
-const joinCode = async c => { try { await post('/pair/join', { code: c }); history.replaceState(null, '', '/'); start(); } catch (e) { $('codebox').hidden = false; $('werr').textContent = e.message; } };
+const joinCode = async c => { try { await post('/pair/join', { code: c }); track('pair_join'); history.replaceState(null, '', '/'); start(); } catch (e) { $('codebox').hidden = false; $('werr').textContent = e.message; } };
 $('join').onclick = () => joinCode($('cin').value); $('cin').oninput = () => { if ($('cin').value.replace(/\D/g, '').length === 6) joinCode($('cin').value); };
 $('showlogin').onclick = () => { $('loginbox').hidden = false; $('em').focus(); };
 $('login').onclick = async () => { try { await post('/login', { email: $('em').value, password: $('pw').value }); start(); } catch (e) { $('werr').textContent = e.message; } };
@@ -29,7 +29,7 @@ addEventListener('click', () => { $('menu').style.display = 'none'; $('devpanel'
 $('out').onclick = async () => { if (confirm('Log out? If you have not saved your account with an email, use "Add device" first so you can get back in.')) { await post('/logout'); es?.close(); location.reload(); } };
 $('del').onclick = async () => { if (confirm('Permanently delete your account and ALL clips? This cannot be undone.')) { await post('/delete-account'); location.reload(); } };
 $('secure').onclick = () => $('secm').style.display = 'grid'; $('sclose').onclick = () => $('secm').style.display = 'none';
-$('ssave').onclick = async () => { try { await post('/upgrade', { email: $('sem').value, password: $('spw').value }); $('secm').style.display = 'none'; toast('Account saved ✓'); start(); } catch (e) { $('serr').textContent = e.message; } };
+$('ssave').onclick = async () => { try { await post('/upgrade', { email: $('sem').value, password: $('spw').value }); track('sign_up',{method:'email'}); $('secm').style.display = 'none'; toast('Account saved ✓'); start(); } catch (e) { $('serr').textContent = e.message; } };
 let pt, pairBase = 0; function closePair(ok) { clearInterval(pt); if (ok) { $('pairbody').innerHTML = '<div style="font-size:64px">✅</div><h3>Device connected!</h3>'; setTimeout(() => { $('pairm').style.display = 'none'; }, 1200); } else $('pairm').style.display = 'none'; }
 async function openPair() { pairBase = devs.filter(x => x.id !== myId).length; if (!$('qr')) location.reload(); $('pairm').style.display = 'grid'; $('host').textContent = location.host; clearInterval(pt);
   try { const { code, expiresIn } = await post('/pair/create'); $('pcode').textContent = code.replace(/(\d{3})(\d{3})/, '$1 $2'); $('qr').src = '/api/pair/qr/' + code;
@@ -112,7 +112,7 @@ function upload(fd) { return new Promise((res, rej) => { const x = new XMLHttpRe
   x.upload.onprogress = e => { p.style.display = 'block'; bar.style.width = (e.loaded / e.total * 100) + '%'; };
   x.onload = () => { p.style.display = 'none'; let j = {}; try { j = JSON.parse(x.responseText); } catch {} x.status < 300 ? res(j) : rej(new Error(j.error || 'Upload failed')); };
   x.onerror = () => { p.style.display = 'none'; rej(new Error('No internet connection')); }; x.send(fd); }); }
-async function send(text, files) { if (!text && !files.length) return toast('Type or paste something first'); const fd = new FormData(); fd.append('device', device + '#' + myId.slice(0,8)); if (text) fd.append('text', text); files.forEach(f => fd.append('files', f, f.name));
+async function send(text, files) { if (!text && !files.length) return toast('Type or paste something first'); track('clip_sent',{files:files.length,text:text?1:0}); const fd = new FormData(); fd.append('device', device + '#' + myId.slice(0,8)); if (text) fd.append('text', text); files.forEach(f => fd.append('files', f, f.name));
   try { toast(files.length ? 'Uploading…' : 'Sending…', null, null, 60000); const out = await upload(fd); out.forEach(i => { if (!items.find(x => x.id === i.id)) { items.unshift(i); fresh.add(i.id); } }); render(); toast('Sent ✓ — it is on your other devices now'); return true; }
   catch (e) { toast(e.message); } }
 $('send').onclick = async () => { if (await send($('t').value.trim(), [])) $('t').value = ''; };
